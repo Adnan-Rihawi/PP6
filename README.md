@@ -165,7 +165,9 @@ _start:
 1. **What is a file descriptor and how does the OS use it?**
 2. **How can you obtain or duplicate a file descriptor for another resource (e.g., a file or socket)?**
 3. **What might happen if you use an invalid file descriptor in a syscall?**
-
+1 Ein FD ist ein Handle, das der Prozess benutzt, um mit Dateien oder anderen I/O‑Ressourcen zu arbeiten.
+2 FDs entstehen durch open, socket, pipe oder werden durch dup/dup2 kopiert.
+3 Ein ungültiger FD führt zu einem Fehler vom Typ EBADF.
 ---
 
 ### Task 3: C Printing
@@ -205,7 +207,24 @@ int main(void) {
 1. **Use `objdump -d` on `print_c` to find the assembly instructions corresponding to your `printf` calls.**
 2. **Why is the syntax written differently from GAS assembly? Compare NASM vs. GAS notation.**
 3. **How could you use `fprintf` to write output both to `stdout` and to a file instead? Provide example code.**
+1 Der Code aus objdump -d sieht anders aus, weil er disassemblierter Maschinencode ist, den der Compiler erzeugt hat. objdump verwendet die AT&T‑Syntax, während meine eigene Assembly‑Datei in GAS‑Quellsyntax geschrieben ist. Der Compiler optimiert den Code stark, daher entspricht der disassemblierte Code nicht 1:1 meinem ursprünglichen C‑Code.
+2 NASM verwendet die Intel‑Syntax (Ziel zuerst, keine % oder $), während GAS und objdump die AT&T‑Syntax nutzen (Quelle → Ziel, Register mit %, Immediate mit $). Deshalb sehen dieselben Befehle in NASM und GAS unterschiedlich aus.
+3 #include <stdio.h>
 
+int main() {
+    fprintf(stdout, "Ausgabe auf stdout\n");
+
+    FILE *f = fopen("output.txt", "w");
+    if (!f) return 1;
+
+    fprintf(f, "Ausgabe in Datei\n");
+
+    fprintf(stdout, "Beides gleichzeitig\n");
+    fprintf(f, "Beides gleichzeitig\n");
+
+    fclose(f);
+    return 0;
+} 
 ---
 
 ### Task 4: Python 3 Printing
@@ -246,7 +265,8 @@ if __name__ == "__main__":
 
 1. **Is Python’s print behavior closer to Bash, Assembly, or C? Explain.**
 2. **Can you inspect a Python script’s binary with `objdump`? Why or why not?**
-
+1 Pythons print‑Funktion ähnelt am meisten C, weil sie wie printf ein Teil der Standardbibliothek ist und formatierte Ausgaben unterstützt. Bash‑echo ist viel einfacher, und Assembly hat überhaupt keine High‑Level‑Printfunktion, sondern nur Syscalls. Deshalb liegt Python funktional am nächsten bei C.
+2 Nein, ein Python‑Skript kann man nicht sinnvoll mit objdump untersuchen, weil es kein kompiliertes Binary ist. Python‑Dateien sind reiner Text, der vom Python‑Interpreter ausgeführt wird. objdump funktioniert nur auf ELF‑Binaries oder Objektdateien, nicht auf .py‑Skripten.
 ---
 
 **Remember:** Stop working after **90 minutes** and document where you stopped.
